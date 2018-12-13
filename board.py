@@ -89,7 +89,8 @@ class Board(object):
         given to them to pick from
 
 
-        To Do:
+        TODO:
+            - [  ] Proper Turns
             - [  ] jumps / taking pieces
             - [  ] Kinging
         '''
@@ -110,6 +111,13 @@ class Board(object):
             index_piece = self.index(*self.to_index(piece))
             self.state[index_piece], self.state[index_choice] = self.state[index_choice], self.state[index_piece]
 
+            '''
+            TODO:
+            - jumping to the left
+            - taking piece for odd rows
+            - all jumping with the o's
+
+            '''
             diff = abs(index_choice - index_piece)
             if diff == 7:
                 self.state[index_piece+3] = ' '
