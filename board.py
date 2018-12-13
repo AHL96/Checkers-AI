@@ -44,7 +44,7 @@ class Board(object):
         self.state = [
             'x', 'x', 'x', 'x',
             'x', 'x', 'x', 'x',
-            ' ', ' ', ' ', ' ',
+            ' ', 'o', ' ', ' ',
             ' ', ' ', ' ', ' ',
             ' ', ' ', ' ', ' ',
             ' ', ' ', ' ', ' ',
@@ -109,6 +109,12 @@ class Board(object):
             index_choice = self.index(*self.to_index(choice))
             index_piece = self.index(*self.to_index(piece))
             self.state[index_piece], self.state[index_choice] = self.state[index_choice], self.state[index_piece]
+
+            diff = abs(index_choice - index_piece)
+            if diff == 7:
+                self.state[index_piece+3] = ' '
+            if diff == 9:
+                self.state[index_piece+4] = ' '
 
     def index(self, i, j):
         '''
