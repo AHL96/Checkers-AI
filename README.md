@@ -33,3 +33,13 @@ how the computer views it
 |20|21|22|23|
 |24|25|26|27|
 |28|29|30|31|
+
+
+Moving
+
+|row| even | odd |
+|-|-|-|
+|down right|5|4|
+|down left|4|3|
+|up right|-3|-4|
+|up left|-4|-5|

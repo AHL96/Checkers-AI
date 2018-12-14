@@ -20,37 +20,19 @@ class Board(object):
 
         only storing the parts of the board that are actually used
 
-        _   0   _   1   _   2   _   3
-        4   _   5   _   6   _   7   _
-        _   8   _   9  _   10  _   11
-        12  _   13  _   14  _   15  _
-        _   16  _   17  _   18  _   19
-        20  _   21  _   22  _   23  _
-        _   24  _   25  _   26  _   27
-        28  _   29  _   30  _   31  _
-
-
-        0   1   2   3
-        4   5   6   7
-        8   9   10  11
-        12  13  14  15
-        16  17  18  19
-        20  21  22  23
-        24  25  26  27
-        28  29  30  30
-
-
         '''
         self.state = [
             'x', 'x', 'x', 'x',
             'x', 'x', 'x', 'x',
-            ' ', 'o', ' ', ' ',
+            'x', ' ', ' ', ' ',
+            'o', ' ', ' ', ' ',
             ' ', ' ', ' ', ' ',
-            ' ', ' ', ' ', ' ',
-            ' ', ' ', ' ', ' ',
+            'x', ' ', ' ', ' ',
             'o', 'o', 'o', 'o',
             'o', 'o', 'o', 'o'
         ]
+
+        self.unjumpable = [0,1,2,3,4,11,12,19,20,27,28,29,30,31]
 
     def __repr__(self):
         # return string
@@ -83,6 +65,13 @@ class Board(object):
 
         return letter, number
 
+    def index(self, i, j):
+        '''
+        use this function to treat the 1D list as a 2D list
+        width of self.state is 4
+        '''
+        return 4*j + i//2
+
     def move(self, piece):
         '''
         the player picks a piece to move then the possible moves to make are
@@ -94,7 +83,7 @@ class Board(object):
             - [  ] jumps / taking pieces
             - [  ] Kinging
         '''
-        self.turn += 1
+
 
         options = [self.to_letter_number(item)
                    for item in self.list_possible_indexes(piece)]
@@ -118,20 +107,21 @@ class Board(object):
             - all jumping with the o's
 
             '''
-            diff = abs(index_choice - index_piece)
+            diff = index_choice - index_piece
+            # if self.state[index_piece] == 'x':
+            letter, number = self.to_index(piece)
+            # if number % 2 == 0: # odd rows
             if diff == 7:
-                self.state[index_piece+3] = ' '
-            if diff == 9:
-                self.state[index_piece+4] = ' '
+                self.state[index_piece+4 - (number % 2)] = ' '
+            elif diff == 9:
+                self.state[index_piece+5 - (number % 2)] = ' '
+            # elif self.state[index_piece] == 'o':
+            elif diff == -7:
+                self.state[index_piece-3 - (number % 2)] = ' '
+            elif diff == -9:
+                self.state[index_piece-4 - (number % 2)] = ' '
 
-    def index(self, i, j):
-        '''
-        use this function to treat the 1D list as a 2D list
-        width of self.state is 4
-
-
-        '''
-        return 4*j + i//2
+        self.turn += 1
 
     def list_possible_indexes(self, tile):
         letter, number = self.to_index(tile)
@@ -144,7 +134,7 @@ class Board(object):
         piece = self.state[i]
         possible_indexes = []
 
-        if piece == 'x':
+        if piece == 'x' and self.turn % 2 == 0:
             if self.state[i+4] != piece:
                 possible_indexes.append(i+4)
 
@@ -156,17 +146,32 @@ class Board(object):
             elif number % 2 == 0 and i % 4 != 3 and self.state[i+5] != piece:
                 possible_indexes.append(i+5)
 
+            # jumping pieces
             c = 0
             while c < len(possible_indexes):
                 index = possible_indexes[c]
                 if self.state[index] == 'o':
-                    q = possible_indexes[c] + 4
-                    possible_indexes.remove(index)
-                    if self.state[q] == ' ':
-                        possible_indexes.append(q)
+                    if possible_indexes[c] - i + number % 2 == 4:
+                        if possible_indexes[c] not in self.unjumpable:
+                            new_i = possible_indexes[c] + (3 + number % 2)
+                            if self.state[new_i] == ' ' :
+                                possible_indexes[c] += 3 + number % 2
+                        else:
+                            possible_indexes.pop(c)
+                            c-=1
+
+                    elif possible_indexes[c] - i + number % 2 == 5:
+                        if possible_indexes[c] not in self.unjumpable:
+                            new_i = possible_indexes[c] + (4 + number % 2)
+                            if self.state[new_i] == ' ':
+                                possible_indexes[c] += 4 + number % 2
+                        else:
+                            possible_indexes.pop(c)
+                            c-=1
+
                 c += 1
 
-        elif piece == 'o':
+        elif piece == 'o' and self.turn % 2 == 1:
             if self.state[i-4] != piece:
                 possible_indexes.append(i-4)
 
@@ -176,6 +181,32 @@ class Board(object):
             elif number % 2 == 1 and i % 4 != 0 and self.state[i-5] != piece:
                 possible_indexes.append(i-5)
 
+            # jumping pieces
+            c = 0
+            while c < len(possible_indexes):
+                index = possible_indexes[c]
+                if self.state[index] == 'x':
+
+                    if possible_indexes[c] - i + number % 2 == -4:
+                        if possible_indexes[c] not in self.unjumpable:
+                            new_i = possible_indexes[c] - (5 - number % 2)
+                            if self.state[new_i] == ' ':
+                                possible_indexes[c] -= 5 - number % 2
+                        else:
+                            possible_indexes.pop(c)
+                            c-=1
+
+                    elif possible_indexes[c] - i + number % 2 == -3:
+                        if possible_indexes[c] not in self.unjumpable:
+                            new_i = possible_indexes[c] - (4 - number % 2)
+                            if self.state(new_i) == ' ':
+                                possible_indexes[c] -= 4 - number % 2
+                        else:
+                            possible_indexes.pop(c)
+                            c -= 1
+
+
+                c += 1
         elif piece == 'O' or piece == 'X':
             # finish this part of the function for kinging
             possible_indexes.append()
