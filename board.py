@@ -14,6 +14,7 @@ class Board(object):
     def __init__(self):
         # who's turn is it? Mod turn to find out
         self.turn = 0
+        self.running = True
 
         '''
         the game state is saved in a 1D list for mathematical reasons
@@ -22,43 +23,53 @@ class Board(object):
 
         '''
         self.state = [
-            'x', 'x', 'x', 'x',
-            'x', 'x', 'x', 'x',
             'x', ' ', ' ', ' ',
-            'o', ' ', ' ', ' ',
+            'x', ' ', 'x', ' ',
+            ' ', ' ', 'o', ' ',
             ' ', ' ', ' ', ' ',
-            'x', ' ', ' ', ' ',
-            'o', 'o', 'o', 'o',
-            'o', 'o', 'o', 'o'
+            'o', ' ', ' ', ' ',
+            ' ', 'o', ' ', 'x',
+            ' ', ' ', 'o', ' ',
+            ' ', ' ', ' ', ' '
         ]
 
         self.unjumpable = [0,1,2,3,4,11,12,19,20,27,28,29,30,31]
 
-        self.player = {}
+        self.x_pos = []
+        self.o_pos = []
 
-        self.player['x'] = {
-            'player': 'x',
-            'opponent': 'o',
-            'left': 4,
-            'right': 5,
-            'new left': lambda pos_i, row: pos_i + (3 + row % 2),
-            'new right': lambda pos_i, row: pos_i + (4 + row % 2)
-        }
+        for i in range(len(self.state)):
+            if self.state[i] == 'x':
+                self.x_pos.append(i)
+            elif self.state[i] == 'o':
+                self.o_pos.append(i)
 
-        self.player['o'] = {
-            'player': 'o',
-            'opponent': 'x',
-            'left': -4,
-            'right': -3,
-            'new left': lambda pos_i, row: pos_i - (5-row % 2),
-            'new right': lambda pos_i, row: pos_i - (4-row % 2)
-        }
+
+        # self.player = {}
+
+        # self.player['x'] = {
+        #     'player': 'x',
+        #     'opponent': 'o',
+        #     'left': 4,
+        #     'right': 5,
+        #     'new left': lambda pos_i, row: pos_i + (3 + row % 2),
+        #     'new right': lambda pos_i, row: pos_i + (4 + row % 2)
+        # }
+
+        # self.player['o'] = {
+        #     'player': 'o',
+        #     'opponent': 'x',
+        #     'left': -4,
+        #     'right': -3,
+        #     'new left': lambda pos_i, row: pos_i - (5-row % 2),
+        #     'new right': lambda pos_i, row: pos_i - (4-row % 2)
+        # }
 
 
     def __repr__(self):
         # return string
         # system('clear')
-        top = '    a   b   c   d   e   f   g   h\n'
+        top = '\n    a   b   c   d   e   f   g   h\n'
 
         for i in range(8):
             top += '  ' + '-'*33 + '\n%s ' % (i+1)
@@ -78,7 +89,7 @@ class Board(object):
         letters = ['b', 'd', 'f', 'h', 'a', 'c', 'e', 'g']
         letter = letters[index % 8]
 
-        return "%s%s" % (letter, number)
+        return "%s%d" % (letter, number)
 
     def to_index(self, letter_number):
         letter = ord(letter_number[0].lower()) % 97
@@ -93,7 +104,7 @@ class Board(object):
         '''
         return 4*j + i//2
 
-    def move(self, piece):
+    def move(self, loc, new_loc):
         '''
         the player picks a piece to move then the possible moves to make are
         given to them to pick from
@@ -106,42 +117,42 @@ class Board(object):
         '''
 
 
-        options = [self.to_letter_number(item)
-                   for item in self.list_possible_indexes(piece)]
-        choice = raw_input("your options are %s\n" % options)
+        index_choice = self.index(*self.to_index(new_loc))
+        index_piece = self.index(*self.to_index(loc))
+        self.state[index_piece], self.state[index_choice] = self.state[index_choice], self.state[index_piece]
 
-        '''
-        o = old move
-        n = new move
 
-        o,n = n,o
-        '''
-        if choice in options:
-            index_choice = self.index(*self.to_index(choice))
-            index_piece = self.index(*self.to_index(piece))
-            self.state[index_piece], self.state[index_choice] = self.state[index_choice], self.state[index_piece]
+        if self.state[index_choice] == 'x':
+            self.x_pos.remove(index_piece)
+            self.x_pos.append(index_choice)
 
-            '''
-            TODO:
-                - [x] jumping to the left
-                - [x] taking piece for odd rows
-                - [x] all jumping with the o's
-            '''
-            diff = index_choice - index_piece
-            # if self.state[index_piece] == 'x':
-            letter, number = self.to_index(piece)
-            # if number % 2 == 0: # odd rows
-            if diff == 7:
-                self.state[index_piece+4 - (number % 2)] = ' '
-            elif diff == 9:
-                self.state[index_piece+5 - (number % 2)] = ' '
-            # elif self.state[index_piece] == 'o':
-            elif diff == -7:
-                self.state[index_piece-3 - (number % 2)] = ' '
-            elif diff == -9:
-                self.state[index_piece-4 - (number % 2)] = ' '
+        elif self.state[index_choice] == 'o':
+            self.o_pos.remove(index_piece)
+            self.o_pos.append(index_choice)
 
-        self.turn += 1
+
+        # removing jumped
+        diff = index_choice - index_piece
+        letter, number = self.to_index(loc)
+        if diff == 7:
+            delete = index_piece+4 - (number % 2)
+            self.o_pos.remove(delete)
+            self.state[delete] = ' '
+        elif diff == 9:
+            delete = index_piece+5 - (number % 2)
+            self.o_pos.remove(delete)
+            self.state[delete] = ' '
+
+        elif diff == -7:
+            delete = index_piece-3 - (number % 2)
+            self.x_pos.remove(delete)
+            self.state[delete] = ' '
+
+        elif diff == -9:
+            self.state[index_piece-4 - (number % 2)] = ' '
+            delete = index_piece-4 - (number % 2)
+            self.x_pos.remove(delete)
+            self.state[delete] = ' '
 
     def list_possible_indexes(self, tile):
         letter, number = self.to_index(tile)
@@ -158,16 +169,16 @@ class Board(object):
         controls = self.player[piece]
         '''
 
-        if piece == 'x' and self.turn % 2 == 0:
-            if self.state[i+4] != piece:
+        if piece == 'x':
+            if i+4 <= 31 and self.state[i+4] != piece:
                 possible_indexes.append(i+4)
 
             # event row and not on left edge
             # right move
-            if number % 2 == 1 and i % 4 != 0 and self.state[i+3] != piece:
+            if i+3 <= 31 and number % 2 == 1 and i % 4 != 0 and self.state[i+3] != piece:
                 possible_indexes.append(i+3)
             # left move
-            elif number % 2 == 0 and i % 4 != 3 and self.state[i+5] != piece:
+            elif i+5 <= 31 and number % 2 == 0 and i % 4 != 3 and self.state[i+5] != piece:
                 possible_indexes.append(i+5)
 
             # jumping pieces
@@ -195,14 +206,14 @@ class Board(object):
 
                 c += 1
 
-        elif piece == 'o' and self.turn % 2 == 1:
-            if self.state[i-4] != piece:
+        elif piece == 'o':
+            if i-4 >= 0 and self.state[i-4] != piece:
                 possible_indexes.append(i-4)
 
-            if number % 2 == 0 and i % 4 != 3 and self.state[i-3] != piece:
+            if i-3 >= 0 and number % 2 == 0 and i % 4 != 3 and self.state[i-3] != piece:
                 possible_indexes.append(i-3)
 
-            elif number % 2 == 1 and i % 4 != 0 and self.state[i-5] != piece:
+            elif i-5 >= 0 and number % 2 == 1 and i % 4 != 0 and self.state[i-5] != piece:
                 possible_indexes.append(i-5)
 
             # jumping pieces
@@ -223,31 +234,32 @@ class Board(object):
                     elif possible_indexes[c] - i + number % 2 == -3:
                         if possible_indexes[c] not in self.unjumpable:
                             new_i = possible_indexes[c] - (4 - number % 2)
-                            if self.state(new_i) == ' ':
+                            if self.state[new_i] == ' ':
                                 possible_indexes[c] = new_i
                         else:
                             possible_indexes.pop(c)
                             c -= 1
-
-
                 c += 1
+
         elif piece == 'O' or piece == 'X':
             # finish this part of the function for kinging
             possible_indexes.append()
 
         return possible_indexes
 
-    def check_winner(self, xo):
-        for row in self.state:
-            for spot in row:
-                if xo == spot.lower():
-                    return False  # no winner yet
-
-        return True  # someone has won
 
 
-b = Board()
-while True:
-    print b
-    piece = raw_input('what piece would you like to move?\n')
-    b.move(piece)
+# b = Board()
+# while True:
+#     print b
+#     piece = raw_input('what piece would you like to move?\n')
+#     to = raw_input('where would you like to move it?\n')
+#     options = [b.to_letter_number(item) for item in b.list_possible_indexes(piece)]
+
+#     # print options
+
+#     if to in options:
+#         b.move(piece, to)
+#         b.turn += 1
+#     else:
+#         print "please make a valid move"

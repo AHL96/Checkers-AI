@@ -9,7 +9,7 @@ the checker board we used a 1D list with 32 spots in it
 
 how the player views it
 
-|~|a|b|c|d|e|f|g|h|
+| |a|b|c|d|e|f|g|h|
 |-|-|-|-|-|-|-|-|-|
 |1| |0| |1| |2| |3
 |2|4| |5| |6| |7|
