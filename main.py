@@ -4,11 +4,14 @@ Main file of exicution
 
 from board import Board
 from minimax import *
+from os import system
+from time import sleep
 
 
 b = Board()
 
 while b.running:
+    system('clear')
     print b
     if b.turn % 2 == 0:
         # person
@@ -25,6 +28,7 @@ while b.running:
 
     else:
         # AI
-
+        print "AI is making it's move"
         score, b.state = MiniMax(b, 2, True, b.state)
         b.turn += 1
+        sleep(2)
