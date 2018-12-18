@@ -1,5 +1,5 @@
 '''
-Main file of exicution
+Main file of execution
 '''
 
 from board import Board
@@ -28,7 +28,6 @@ while b.running:
 
     else:
         # AI
-        print "AI is making it's move"
-        score, b.state = MiniMax(b, 2, True, b.state)
+        print "AI is thinking..."
+        score, b.state = MiniMax(b, 3, True, b.state)
         b.turn += 1
-        sleep(2)
