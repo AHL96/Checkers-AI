@@ -35,6 +35,10 @@ while not existLoser:
     else:
         # AI
         print "AI is thinking..."
+        oldboard = b.state
         score, b = MiniMax(b, 5, True)
         turn += 1
         existLoser = b.check_lost("x")
+        if oldboard == b.state:
+            existLoser = True
+            print "The AI surrendered"
