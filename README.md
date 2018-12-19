@@ -1,8 +1,28 @@
 # Machine-Learning-Final-Project
 Using reinforcement learning to play checkers
 
+# How to Run
+python2
 
-## implementation
+1) clone repo
+2) navigate to dir
+3) python main.py
+
+
+# Game play
+
+* you are player o. You have first move
+
+* kinged pieces are upper cased
+
+* you only get one jump per turn
+
+* normal pieces can only move up the board in a diagonal. Kings can move in all 4 diagonals
+
+* take all the opponents pieces and you win. lose all yours and you lose
+
+
+# Implementation
 
 In checkers, only half of the board is used. So instead of using a 2D list to represent
 the checker board we used a 1D list with 32 spots in it
@@ -35,7 +55,7 @@ how the computer views it
 |28|29|30|31|
 
 
-Moving
+## Moving patterns
 
 |row| even | odd |
 |-|-|-|
