@@ -6,25 +6,38 @@ def evaluate(state):
     score = 0
     x = len(node.x_pos)
     o = len(node.o_pos)
+
     if o == 0:  # winning
         score += 1000
     if x == 0:  # losing
         score -= 1000
-    score += 10*(x - o)  # jumping
+
+    score += 13*(x - o)  # jumping
+
     for x in node.x_pos:  # how far down the board AI is
         letter, number = node.to_index(node.to_letter_number(x))
-        score += 2*number
-        if x in node.unjumpable:  # edge piece
+        if node.state[x] == "x":
+            score += 2*number
+        elif node.state[x] == "X":
+            score += 10
+        if x in node.unjumpable and node.state[x] == 'x':  # edge piece
             score += 5
+
     for o in node.o_pos:  # how far opponent is up the board
         letter, number = node.to_index(node.to_letter_number(o))
-        score += 2 * (7 - number)
-        if o in node.unjumpable:  # edge piece
+        if node.state[o] == "o":
+            score -= 2 * (7 - number)
+        elif node.state[o] == "O":
+            score -= 10
+        if o in node.unjumpable and node.state[o] == 'o':  # edge piece
             score -= 5
+
     return score
 
 
-def MiniMax(game, depth, isMaximissingPlayer, bestBoard):
+def MiniMax(game, depth, isMaximissingPlayer):
+    bestBoard = game
+
     if depth == 0:
         return evaluate(game.state), bestBoard
 
@@ -36,16 +49,16 @@ def MiniMax(game, depth, isMaximissingPlayer, bestBoard):
             oldMove = bestMove
             bestMove = max([
                 bestMove,
-                MiniMax(Node(possible_boards[i]), depth-1, False, bestBoard)[0]
+                MiniMax(Node(possible_boards[i]), depth-1, False)[0]
             ])
             if bestMove != oldMove:
-                bestBoard = possible_boards[i]
+                bestBoard = Node(possible_boards[i])
 
     else:
         bestMove = 9999
         for i in range(len(possible_boards)):
             bestMove = min([bestMove, MiniMax(
-                Node(possible_boards[i]), depth-1, True, bestBoard)[0]])
+                Node(possible_boards[i]), depth-1, True)[0]])
 
     return bestMove, bestBoard
 
