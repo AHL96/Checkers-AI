@@ -1,4 +1,4 @@
-# from os import system
+from random import randint
 
 
 class Board(object):
@@ -13,8 +13,6 @@ class Board(object):
 
     def __init__(self):
         # who's turn is it? Mod turn to find out
-        self.turn = 0
-        self.running = True
 
         '''
         the game state is saved in a 1D list for mathematical reasons
@@ -249,18 +247,31 @@ class Board(object):
 
         return possible_indexes
 
+    def check_lost(self, xo):
+        return len(self.o_pos) == 0 or len(self.x_pos) == 0
 
-# b = Board()
-# while True:
-#     print b
-#     piece = raw_input('what piece would you like to move?\n')
-#     to = raw_input('where would you like to move it?\n')
-#     options = [b.to_letter_number(item) for item in b.list_possible_indexes(piece)]
+    def random_board(self):
+        x = []
+        o = []
+        for i in range(randint(3, 7)):
+            choice = randint(0, 27)
+            if choice not in x or choice not in o:
+                x.append(choice)
 
-#     # print options
+        for i in range(randint(3, 7)):
+            choice = randint(4, 31)
+            if choice not in x or choice not in o:
+                o.append(choice)
 
-#     if to in options:
-#         b.move(piece, to)
-#         b.turn += 1
-#     else:
-#         print "please make a valid move"
+        i = 0
+        while i <= 31:
+            if i in x:
+                self.state[i] = 'x'
+            elif i in o:
+                self.state[i] = 'o'
+            else:
+                self.state[i] = ' '
+            i += 1
+
+        self.x_pos = x
+        self.o_pos = o
